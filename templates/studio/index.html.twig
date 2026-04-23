@@ -1,0 +1,177 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nos Studios - Cap Vacances{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root { --primary-color: #0d6efd; --bg-light: #f8f9fa; }
+        
+        /* Barre de filtre moderne */
+        .filter-bar { 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            margin-top: -30px; 
+            z-index: 10; 
+            position: relative;
+        }
+
+        /* Cartes des studios */
+        .studio-card { 
+            transition: all 0.3s ease; 
+            border-radius: 16px; 
+            overflow: hidden;
+            background: white;
+        }
+        .studio-card:hover { 
+            transform: translateY(-10px); 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important; 
+        }
+
+        /* Gestion de l'image avec zoom au survol */
+        .studio-img-wrapper {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+        .studio-img {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.5s ease;
+        }
+        .studio-card:hover .studio-img {
+            transform: scale(1.1);
+        }
+
+        /* Overlay pour améliorer la lisibilité */
+        .img-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(to top, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 100%);
+            z-index: 1;
+        }
+
+        .price-tag { color: var(--primary-color); font-size: 1.4rem; font-weight: 800; }
+        .capacity-badge { 
+            background-color: #e7f1ff; 
+            color: #0d6efd; 
+            font-weight: 600; 
+            padding: 0.5rem 1rem; 
+            border-radius: 50px;
+        }
+        .btn-reserve { border-radius: 10px; font-weight: 600; padding: 0.6rem 1.5rem; }
+    </style>
+{% endblock %}
+
+{% block body %}
+{# Header de page avec fond coloré #}
+<div class="bg-primary text-white pb-5 pt-4 mb-5" style="border-radius: 0 0 30px 30px;">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-5 fw-bold mb-0">Nos Studios</h1>
+                <p class="opacity-75">Trouvez le logement idéal pour vos vacances</p>
+            </div>
+            <span class="badge rounded-pill bg-white text-primary px-3 py-2 fw-bold shadow-sm">
+                {{ studios|length }} hébergements
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    {# Barre de Filtre #}
+    <div class="filter-bar p-4 mb-5">
+        <form action="{{ path('app_studio_index') }}" method="get" class="row g-3 align-items-center">
+            <div class="col-md-auto">
+                <span class="text-secondary fw-bold"><i class="bi bi-funnel-fill me-2"></i>Filtrer par :</span>
+            </div>
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-geo-alt text-primary"></i></span>
+                    <select name="commune" class="form-select border-start-0 shadow-none">
+                        <option value="">Toutes les destinations</option>
+                        {% for commune in communes %}
+                            <option value="{{ commune.id }}" {{ currentCommune == commune.id ? 'selected' : '' }}>
+                                {{ commune.nomCommune }} ({{ commune.cpCommune }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-auto ms-auto">
+                <button type="submit" class="btn btn-primary btn-reserve shadow-sm px-5">Rechercher</button>
+                {% if currentCommune %}
+                    <a href="{{ path('app_studio_index') }}" class="btn btn-light btn-reserve ms-2 text-muted">Effacer</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    {# Grille des Studios #}
+    <div class="row g-4 mb-5">
+        {% for studio in studios %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 studio-card border-0 shadow-sm">
+                    
+                    {# Image Locale Automatique #}
+                    <div class="studio-img-wrapper">
+                        {# 
+                           On calcule un numéro entre 1 et 5 selon l'ID du studio 
+                           Assure-toi d'avoir 1.jpg, 2.jpg, 3.jpg, 4.jpg, 5.jpg dans public/images/studios/
+                        #}
+                        {% set imgNumber = (studio.id % 5) + 1 %}
+                        <img src="{{ asset('images/studios/' ~ imgNumber ~ '.jpg') }}" 
+                             class="studio-img" 
+                             alt="Photo de {{ studio.nomStudio }}">
+                        <div class="img-overlay"></div>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold mb-0 text-dark">{{ studio.nomStudio }}</h5>
+                            <span class="capacity-badge small">
+                                <i class="bi bi-person-fill"></i> {{ studio.nbPlacesStudio }}
+                            </span>
+                        </div>
+                        
+                        <div class="text-muted small mb-4">
+                            <div class="mb-1">
+                                <i class="bi bi-geo-alt-fill text-danger"></i> 
+                                {{ studio.village.nomVillage|default('VVF') }} 
+                                <span class="mx-1 text-black-50">•</span>
+                                <span class="fw-medium text-dark">{{ (studio.village and studio.village.commune) ? studio.village.commune.nomCommune : 'N/C' }}</span>
+                            </div>
+                        </div>
+
+                        <hr class="text-black-50 opacity-10">
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div>
+                                <span class="price-tag">{{ studio.prixSaisonStudio|number_format(2, ',', ' ') }} €</span>
+                                <span class="text-muted small d-block">par semaine</span>
+                            </div>
+                            <a href="{{ path('app_reservation_new', {'num_studio': studio.id}) }}" class="btn btn-outline-primary btn-reserve">
+                                Réserver
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12 py-5 text-center">
+                <div class="display-1 text-muted mb-3"><i class="bi bi-search"></i></div>
+                <h3>Aucun studio trouvé</h3>
+                <p class="text-muted">Essayez de modifier vos filtres de recherche.</p>
+                <a href="{{ path('app_studio_index') }}" class="btn btn-primary mt-3">Voir tous les studios</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réserver {{ studio.nomStudio }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .card { border-radius: 15px; overflow: hidden; }
+        .card-header { background: linear-gradient(135deg, #0d6efd 0%, #003d99 100%); border-bottom: none; }
+        .form-control { border-radius: 8px; border: 1px solid #dee2e6; padding: 0.75rem 1rem; }
+        .form-control:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.25 row rgba(13, 110, 253, 0.1); }
+        .input-group-text { border-radius: 8px 0 0 8px; background-color: #f8f9fa; }
+        .datepicker { background-color: #fff !important; cursor: pointer; }
+        .btn-reservation { border-radius: 10px; padding: 12px; font-weight: 600; transition: all 0.3s; }
+        .btn-reservation:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3); }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center mt-5 mb-5">
+    <div class="col-lg-7 col-md-9">
+        <div class="card shadow-lg border-0">
+            {# Header #}
+            <div class="card-header p-4 text-center">
+                <span class="badge bg-white text-primary mb-2 fw-bold text-uppercase" style="letter-spacing: 1px;">Réservation</span>
+                <h2 class="text-white fw-bold mb-1">{{ studio.nomStudio }}</h2>
+                <p class="text-white-50 mb-0">
+                    <i class="bi bi-geo-alt-fill me-1"></i>{{ studio.village.nomVillage }} 
+                    <span class="mx-2">•</span> 
+                    <i class="bi bi-people-fill me-1"></i>Jusqu'à {{ studio.nbPlacesStudio }} personnes
+                </p>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                {{ form_start(form) }}
+                    <div class="row g-4">
+                        {# Date d'arrivée #}
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary">Date d'arrivée</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar-check text-primary"></i></span>
+                                {{ form_widget(form.dateDebutReservation, {
+                                    'attr': {
+                                        'class': 'form-control datepicker',
+                                        'placeholder': 'Choisir une date...'
+                                    }
+                                }) }}
+                            </div>
+                        </div>
+
+                        {# Date de départ #}
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold text-secondary">Date de départ</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-calendar-x text-danger"></i></span>
+                                {{ form_widget(form.dateFinReservation, {
+                                    'attr': {
+                                        'class': 'form-control datepicker',
+                                        'placeholder': 'Choisir une date...'
+                                    }
+                                }) }}
+                            </div>
+                        </div>
+
+                        {# Nombre de personnes #}
+                        <div class="col-12">
+                            <label class="form-label fw-semibold text-secondary">Nombre de vacanciers</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-people text-dark"></i></span>
+                                {{ form_widget(form.nbPersonnesReservation, {
+                                    'attr': {
+                                        'class': 'form-control', 
+                                        'min': '1', 
+                                        'max': studio.nbPlacesStudio,
+                                        'type': 'number',
+                                        'placeholder': 'Combien de personnes ? (max ' ~ studio.nbPlacesStudio ~ ')'
+                                    }
+                                }) }}
+                            </div>
+                            <div class="form-text text-end">Capacité maximale : {{ studio.nbPlacesStudio }} personnes</div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-light border-0 mt-4 d-flex align-items-center shadow-sm" style="border-left: 4px solid #0dcaf0 !important;">
+                        <i class="bi bi-info-circle-fill text-info fs-4 me-3"></i>
+                        <div>
+                            <small class="text-muted d-block">Information tarifaire</small>
+                            <span class="fw-medium text-dark">Le prix total sera ajusté selon la saisonnalité.</span>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-3 mt-5">
+                        <button type="submit" class="btn btn-primary btn-reservation btn-lg">
+                            <i class="bi bi-check-circle me-2"></i>Confirmer la réservation
+                        </button>
+                        <a href="{{ path('app_studio_index') }}" class="btn btn-link text-decoration-none text-muted fw-medium">
+                            <i class="bi bi-arrow-left me-1"></i>Retour aux studios
+                        </a>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    {# Optionnel : Traduction française #}
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/fr.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const disabledDates = {{ disabled_dates|raw }};
+
+            const config = {
+                locale: "fr",
+                minDate: "today",
+                altInput: true,         // Active l'affichage "humain"
+                altFormat: "d/m/Y",    // Format affiché : 21/04/2026
+                dateFormat: "Y-m-d",   // Format envoyé à Symfony : 2026-04-21
+                disable: disabledDates,
+                allowInput: false,
+                disableMobile: "true"
+            };
+
+            flatpickr(".datepicker", config);
+        });
+    </script>
+{% endblock %}

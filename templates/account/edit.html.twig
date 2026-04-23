@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon profil{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow p-4">
+            <h2 class="fw-bold mb-4 text-center">Modifier mes données</h2>
+            
+            {{ form_start(form) }}
+                <div class="mb-3">
+                    {{ form_label(form.nomClient, 'Nom de famille') }}
+                    {{ form_widget(form.nomClient, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(form.prenomClient, 'Prénom') }}
+                    {{ form_widget(form.prenomClient, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(form.rueClient, 'Adresse (Rue)') }}
+                    {{ form_widget(form.rueClient, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ path('app_account_index') }}" class="btn btn-light">Annuler</a>
+                    <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
