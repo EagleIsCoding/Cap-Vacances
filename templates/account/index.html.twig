@@ -36,7 +36,6 @@
                                 <th>Studio</th>
                                 <th>Dates</th>
                                 <th class="text-center">Personnes</th>
-                                <th>Statut</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -48,7 +47,6 @@
                                     <small>Au {{ res.dateFinReservation|date('d/m/Y') }}</small>
                                 </td>
                                 <td class="text-center">{{ res.nbPersonnesReservation }}</td>
-                                    <td><span class="badge bg-warning text-dark">En attente</span></td>
                             </tr>
                             {% endfor %}
                         </tbody>
